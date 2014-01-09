@@ -1,0 +1,41 @@
+{
+    "versionLabel": "1.0",
+    "uuid": "06559caf-19e1-425c-a95e-c512fc6467d7",
+    "appKeys": {
+        "dummy": 0
+    },
+    "longName": "Test2",
+    "versionCode": 1,
+    "capabilities": [
+        ""
+    ],
+    "shortName": "Test2",
+    "companyName": "dozauk",
+    "watchapp": {
+        "watchface": false
+    },
+    "resources": {
+        "media": [
+            {
+                "type": "png",
+                "name": "IMAGE_SUN",
+                "file": "images/sun.png"
+            },
+            {
+                "type": "png",
+                "name": "IMAGE_SNOW",
+                "file": "images/snow.png"
+            },
+            {
+                "type": "png",
+                "name": "IMAGE_RAIN",
+                "file": "images/rain.png"
+            },
+            {
+                "type": "png",
+                "name": "IMAGE_CLOUD",
+                "file": "images/cloud.png"
+            }
+        ]
+    }
+}
