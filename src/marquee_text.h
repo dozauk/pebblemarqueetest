@@ -3,7 +3,22 @@
 
 #include "pebble.h"
 
-typedef struct MarqueeTextLayer {
+	
+	// New Marquee Layer!
+typedef Layer MarqueeTextLayer;
+
+typedef struct {
+    const char* text;
+    GFont font;
+    GColor text_colour;
+    GColor background_colour;
+    int16_t countdown;
+    int16_t text_width;
+    int16_t offset;
+} MarqueeData;
+//////////////////////////	
+	
+/*typedef struct MarqueeTextLayer {
     Layer* layer;
     const char* text;
     GFont font;
@@ -15,8 +30,9 @@ typedef struct MarqueeTextLayer {
 	struct MarqueeTextLayer* previous;
 	struct MarqueeTextLayer* next;
 } MarqueeTextLayer;
+*/
 
-void marquee_text_layer_tick();
+//void marquee_text_layer_tick();
 void marquee_text_layer_mark_dirty(MarqueeTextLayer *marquee);
 //void marquee_text_layer_init(MarqueeTextLayer *marquee, GRect frame);
 MarqueeTextLayer* marquee_text_layer_create(GRect frame);

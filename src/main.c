@@ -1,5 +1,7 @@
 #include "pebble.h"
 #include "marquee_text.h"
+
+
 	
 static Window *window;
 
@@ -7,6 +9,8 @@ static TextLayer *temperature_layer;
 static MarqueeTextLayer *city_layer;
 static BitmapLayer *icon_layer;
 static GBitmap *icon_bitmap = NULL;
+
+static AppTimer *marquee_timer;
 
 static AppSync sync;
 static uint8_t sync_buffer[64];
@@ -96,7 +100,7 @@ static void window_load(Window *window) {
 	marquee_text_layer_set_font(city_layer, fonts_get_system_font(FONT_KEY_GOTHIC_28_BOLD));
   //marquee_text_layer_set_text_alignment(city_layer, GTextAlignmentCenter);	
   APP_LOG(APP_LOG_LEVEL_DEBUG, "Adding marquee to window layer..");
-	layer_add_child(window_layer, city_layer->layer);
+	layer_add_child(window_layer, city_layer);
 	
   APP_LOG(APP_LOG_LEVEL_DEBUG, "Done marquee setup");
 	
@@ -117,6 +121,15 @@ static void window_load(Window *window) {
       sync_tuple_changed_callback, sync_error_callback, NULL);
 
   send_cmd();
+}
+
+
+
+static void city_marquee_timer_callback(void *data) {
+  MarqueeData *marqueedata = layer_get_data(city_layer);
+	marqueedata->offset += 1;
+	marquee_timer = app_timer_register(50 /* milliseconds */, city_marquee_timer_callback, NULL);
+	layer_mark_dirty(city_layer);
 }
 
 static void window_unload(Window *window) {
@@ -146,6 +159,11 @@ static void init(void) {
 
   const bool animated = true;
   window_stack_push(window, animated);
+	
+	
+  // Start the progress timer
+  marquee_timer = app_timer_register(50 /* milliseconds */, city_marquee_timer_callback, NULL);
+
 }
 
 static void deinit(void) {

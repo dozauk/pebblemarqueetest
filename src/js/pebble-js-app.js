@@ -28,12 +28,12 @@ function fetchWeather(latitude, longitude) {
           icon = iconFromWeatherId(weatherResult.weather[0].id);
           city = weatherResult.name;
           console.log('fetchWeather API succeeded!');
-		  console.log('temperature = ' + temperature + ', icon = ' + icon + ', city = ' + city.substr(1,8));
+		  console.log('temperature = ' + temperature + ', icon = ' + icon + ', city = ' + city);
           Pebble.sendAppMessage({
             "0":icon,
             //"temperature":temperature + "\u00B0C",
 			"1":temperature + "\u00B0C",
-            "2":city.substr(0,18)});
+            "2":city});
         }
 
       } else {
