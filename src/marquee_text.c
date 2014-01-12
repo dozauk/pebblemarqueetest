@@ -6,7 +6,7 @@
 // There is a bug in the text drawing routines that causes glitches as
 // characters gain a negative position. So we lie about our frame, ensuring
 // That this never comes up. But then we have no good way of clipping them.
-#define BOUND_OFFSET 100
+#define BOUND_OFFSET 20
 
 static MarqueeTextLayer* head;
 
@@ -32,11 +32,13 @@ MarqueeTextLayer* marquee_text_layer_create(GRect frame) {
 	layer_set_frame(marquee,GRect(frame.origin.x - BOUND_OFFSET,frame.origin.y,frame.size.w + BOUND_OFFSET, frame.size.h));
 	APP_LOG(APP_LOG_LEVEL_DEBUG, "frame.origin.x = %d, frame.origin.y = %d, frame.size.w = %d, frame.size.h = %d", layer_get_frame(marquee).origin.x, layer_get_frame(marquee).origin.y, layer_get_frame(marquee).size.w, layer_get_frame(marquee).size.h);
 	
-    GRect bounds = layer_get_bounds(marquee);
-    APP_LOG(APP_LOG_LEVEL_DEBUG, "pre bounds.origin.x = %d, bounds.origin.y = %d, bounds.size.w = %d, bounds.size.h = %d", bounds.origin.x, bounds.origin.y, bounds.size.w, bounds.size.h);
-	bounds.origin.x += BOUND_OFFSET;
-    APP_LOG(APP_LOG_LEVEL_DEBUG, "post bounds.origin.x = %d, bounds.origin.y = %d, bounds.size.w = %d, bounds.size.h = %d", bounds.origin.x, bounds.origin.y, bounds.size.w, bounds.size.h);
-	layer_set_bounds(marquee, bounds);
+    //GRect bounds = layer_get_bounds(marquee);
+    //APP_LOG(APP_LOG_LEVEL_DEBUG, "pre bounds.origin.x = %d, bounds.origin.y = %d, bounds.size.w = %d, bounds.size.h = %d", bounds.origin.x, bounds.origin.y, bounds.size.w, bounds.size.h);
+	//bounds.origin.x += BOUND_OFFSET + 25;
+    //APP_LOG(APP_LOG_LEVEL_DEBUG, "post adjust bounds.origin.x = %d, bounds.origin.y = %d, bounds.size.w = %d, bounds.size.h = %d", bounds.origin.x, bounds.origin.y, bounds.size.w, bounds.size.h);
+	//layer_set_bounds(marquee, bounds);
+	layer_set_bounds(marquee,GRect(layer_get_bounds(marquee).origin.x + BOUND_OFFSET,0,frame.size.w + BOUND_OFFSET, frame.size.h));
+	APP_LOG(APP_LOG_LEVEL_DEBUG, "post set bounds.origin.x = %d, bounds.origin.y = %d, bounds.size.w = %d, bounds.size.h = %d", layer_get_bounds(marquee).origin.x, layer_get_bounds(marquee).origin.y, layer_get_bounds(marquee).size.w, layer_get_bounds(marquee).size.h);
     marqueedata->background_colour = GColorWhite;
     marqueedata->text_colour = GColorBlack;
     marqueedata->offset = 0;
@@ -44,6 +46,7 @@ MarqueeTextLayer* marquee_text_layer_create(GRect frame) {
     marqueedata->countdown = 100;
     marqueedata->font = fonts_get_system_font(FONT_KEY_FONT_FALLBACK);
 
+	layer_set_clips(marquee, false);
 	layer_set_update_proc(marquee, do_draw);
 	marquee_text_layer_mark_dirty(marquee);
 		
@@ -126,7 +129,8 @@ static void do_draw(MarqueeTextLayer* marquee, GContext* context) {
 	}
     graphics_context_set_fill_color(context, marqueedata->background_colour);
     graphics_context_set_text_color(context, marqueedata->text_colour);
-    graphics_fill_rect(context, layer_get_bounds(marquee), 0, GCornerNone);
+    //graphics_fill_rect(context, layer_get_bounds(marquee), 0, GCornerNone);
+	//graphics_fill_rect(context, GRect(20,20,20,20), 0, GCornerNone);
 
 	
 	
@@ -140,11 +144,10 @@ static void do_draw(MarqueeTextLayer* marquee, GContext* context) {
 		return;
 	}
 	
-	const int OFFSET30 = BOUND_OFFSET;
 	
-    if(marqueedata->offset > marqueedata->text_width + OFFSET30) {
+    if(marqueedata->offset > marqueedata->text_width + BOUND_OFFSET) {
 
-		APP_LOG(APP_LOG_LEVEL_DEBUG, "resetting since offset is %d which is more than text_width %d + offset %d", marqueedata->offset, marqueedata->text_width, OFFSET30);
+		APP_LOG(APP_LOG_LEVEL_DEBUG, "resetting since offset is %d which is more than text_width %d + offset %d", marqueedata->offset, marqueedata->text_width, BOUND_OFFSET);
 		APP_LOG(APP_LOG_LEVEL_DEBUG, "frame.origin.x = %d, frame.origin.y = %d, frame.size.w = %d, frame.size.h = %d", layer_get_frame(marquee).origin.x, layer_get_frame(marquee).origin.y, layer_get_frame(marquee).size.w, layer_get_frame(marquee).size.h);
 		APP_LOG(APP_LOG_LEVEL_DEBUG, "bounds.origin.x = %d, bounds.origin.y = %d, bounds.size.w = %d, bounds.size.h = %d", layer_get_bounds(marquee).origin.x, layer_get_bounds(marquee).origin.y, layer_get_bounds(marquee).size.w, layer_get_bounds(marquee).size.h);
 		APP_LOG(APP_LOG_LEVEL_DEBUG, "bounds.origin.x = %d, bounds.origin.y = %d, bounds.size.w = %d, bounds.size.h = %d", layer_get_bounds(marquee).origin.x, layer_get_bounds(marquee).origin.y, layer_get_bounds(marquee).size.w, layer_get_bounds(marquee).size.h);
@@ -156,16 +159,27 @@ static void do_draw(MarqueeTextLayer* marquee, GContext* context) {
 	// keep increasing offset until it reaches text_width
     if(marqueedata->offset < marqueedata->text_width) {
 		//APP_LOG(APP_LOG_LEVEL_DEBUG, "drawing 2 -offset = %d", -marqueedata->offset);
-        graphics_draw_text(context, marqueedata->text, marqueedata->font, 
+        
+		//graphics_draw_rect(context, GRect(-marqueedata->offset, 2, marqueedata->text_width, 30));
+		
+		graphics_draw_text(context, marqueedata->text, marqueedata->font, 
 						   	GRect(-marqueedata->offset, 0, marqueedata->text_width, layer_get_frame(marquee).size.h),
 						   	GTextOverflowModeTrailingEllipsis, GTextAlignmentLeft, NULL);
+
+		
 		
 		//Draw the text into the frame with negative offset
 			
     }
-    if(marqueedata->offset > marqueedata->text_width - layer_get_frame(marquee).size.w + OFFSET30) {
+    if(marqueedata->offset > marqueedata->text_width - layer_get_frame(marquee).size.w + BOUND_OFFSET) {
 		//APP_LOG(APP_LOG_LEVEL_DEBUG, "drawing 3 -offset = %d", -marqueedata->offset);
-        graphics_draw_text(context, marqueedata->text, marqueedata->font, GRect(-marqueedata->offset + marqueedata->text_width + OFFSET30, 0, marqueedata->text_width, layer_get_frame(marquee).size.h), GTextOverflowModeTrailingEllipsis, GTextAlignmentLeft, NULL);
+        graphics_draw_text(context, marqueedata->text, marqueedata->font, 
+						   GRect(-marqueedata->offset + marqueedata->text_width + BOUND_OFFSET, 0, marqueedata->text_width, layer_get_frame(marquee).size.h)
+						   , GTextOverflowModeTrailingEllipsis, GTextAlignmentLeft, NULL);
+		
+		//graphics_draw_rect(context, GRect(-marqueedata->offset + marqueedata->text_width + BOUND_OFFSET, 5
+		//								  	, marqueedata->text_width, 10));		
+		
     }
     //APP_LOG(APP_LOG_LEVEL_DEBUG, "drawing hack");
 	// And draw our hack, too:
